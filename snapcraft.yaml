@@ -1,0 +1,71 @@
+name: gnome-clocks
+version: git
+summary: Simple GNOME app with stopwatch, timer, and world clock support
+description: |
+  GNOME Clocks is a simple application to show the time and date in multiple
+  locations and set alarms or timers. A stopwatch is also included.
+
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: strict
+base: core20
+
+layout:
+  /usr/share/libgweather:
+    bind: $SNAP/usr/share/libgweather
+
+# Launchpad doesn't recognize these fields yet
+passthrough:
+  license: GPL-2.0+
+  title: GNOME Clocks
+
+slots:
+  # for GtkApplication registration
+  gnome-clocks:
+    interface: dbus
+    bus: session
+    name: org.gnome.clocks
+
+apps:
+  gnome-clocks:
+    command: usr/bin/gnome-clocks
+    extensions: [ gnome-3-38 ]
+    plugs:
+      - audio-playback
+      - location-observe
+    desktop: usr/share/applications/org.gnome.clocks.desktop
+    environment:
+      GSETTINGS_SCHEMA_DIR: $SNAP/share/glib-2.0/schemas
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/lib/gnome-clocks
+
+parts:
+  gnome-clocks:
+    source: https://gitlab.gnome.org/GNOME/gnome-clocks.git
+    source-type: git
+    plugin: meson
+    meson-parameters: [--prefix=/snap/gnome-clocks/current/usr]
+    organize:
+      snap/gnome-clocks/current/usr: usr
+    build-packages:
+      - itstool
+      - gettext
+      - gsettings-desktop-schemas-dev
+      - desktop-file-utils
+      - appstream-util
+      - appstream
+      - libgeoclue-2-dev
+      - libgeocode-glib-dev
+      - libgnome-desktop-3-dev
+      - libgweather-3-dev
+
+  libraries:
+    plugin: nil
+    stage-packages:
+      - libgeocode-glib0
+      - libgeoclue-2-0
+      - libgweather-3-16
+    prime:
+      - "usr/lib/*/libgeocode-glib.so.*"
+      - "usr/lib/*/libgeoclue-2.so.*"
+      - "usr/lib/*/libgweather*.so.*"
+      - "usr/share/libgweather"
+      - "usr/share/glib-2.0/schemas"
