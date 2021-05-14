@@ -1,5 +1,5 @@
 name: gnome-clocks
-version: git
+adopt-info: gnome-clocks
 summary: Simple GNOME app with stopwatch, timer, and world clock support
 description: |
   GNOME Clocks is a simple application to show the time and date in multiple
@@ -56,6 +56,9 @@ parts:
       - libgeocode-glib-dev
       - libgnome-desktop-3-dev
       - libgweather-3-dev
+    override-pull: |
+      snapcraftctl pull
+      snapcraftctl set-version $(git describe --tags --abbrev=10)
 
   libraries:
     plugin: nil
