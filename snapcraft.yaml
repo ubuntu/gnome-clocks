@@ -37,6 +37,7 @@ apps:
 parts:
   gnome-clocks:
     source: https://gitlab.gnome.org/GNOME/gnome-clocks.git
+    source-tag: '40.0'
     source-type: git
     plugin: meson
     meson-parameters: [--prefix=/snap/gnome-clocks/current/usr]
