@@ -62,6 +62,10 @@ parts:
       snapcraftctl build
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/glib-2.0/
       cp $SNAPCRAFT_PART_INSTALL/usr/bin/{gio-querymodules,glib-compile-schemas} $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/glib-2.0/
+    prime:
+      - -usr/bin
+      - -usr/lib/*/glib-2.0
+      - -usr/share
 
   vala:
     after: [ glib ]
@@ -75,6 +79,8 @@ parts:
       - flex
       - bison
       - libgraphviz-dev
+    prime:
+      - -*
 
   gnome-clocks:
     after: [ vala ]
