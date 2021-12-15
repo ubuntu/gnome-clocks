@@ -35,9 +35,58 @@ apps:
     desktop: usr/share/applications/org.gnome.clocks.desktop
 
 parts:
+
+  buildenv:
+    plugin: nil
+    build-environment: &buildenv
+      - PATH: $SNAPCRAFT_STAGE/usr/bin:$PATH
+      - ACLOCAL_PATH: $SNAPCRAFT_STAGE/usr/share/aclocal
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
+      - LD_LIBRARY_PATH: $SNAPCRAFT_STAGE/usr/lib/vala-0.54:$SNAPCRAFT_STAGE/usr/lib:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
+      - GDK_PIXBUF_MODULE_FILE: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      - PKG_CONFIG_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig:$SNAPCRAFT_STAGE/usr/lib/pkgconfig:$SNAPCRAFT_STAGE/usr/share/pkgconfig:$PKG_CONFIG_PATH
+
+  glib:
+    source: https://gitlab.gnome.org/GNOME/glib.git
+    source-branch: 'glib-2-68'
+    source-depth: 1
+    plugin: meson
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+    build-environment: *buildenv
+    build-environment:
+      - CFLAGS: -Wno-nonnull
+    override-build: |
+      set -eux
+      snapcraftctl build
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/glib-2.0/
+      cp $SNAPCRAFT_PART_INSTALL/usr/bin/{gio-querymodules,glib-compile-schemas} $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/glib-2.0/
+    prime:
+      - -usr/bin
+      - -usr/lib/*/glib-2.0
+      - -usr/share
+      - -usr/include
+
+  vala:
+    after: [ glib ]
+    source: https://gitlab.gnome.org/GNOME/vala.git
+    source-branch: '0.54'
+    plugin: autotools
+    autotools-configure-parameters: [ --prefix=/usr ]
+    build-environment: *buildenv
+    build-packages:
+      - autoconf-archive
+      - flex
+      - bison
+      - libgraphviz-dev
+    prime:
+      - -*
+
   gnome-clocks:
+    after: [ vala ]
     source: https://gitlab.gnome.org/GNOME/gnome-clocks.git
-    source-tag: '40.0'
+    source-tag: '41.0'
     source-type: git
     plugin: meson
     meson-parameters: [--prefix=/snap/gnome-clocks/current/usr]
@@ -57,6 +106,7 @@ parts:
     override-pull: |
       snapcraftctl pull
       snapcraftctl set-version $(git describe --tags --abbrev=10)
+    build-environment: *buildenv
 
   libraries:
     plugin: nil
@@ -70,3 +120,19 @@ parts:
       - "usr/lib/*/libgweather*.so.*"
       - "usr/share/libgweather"
       - "usr/share/glib-2.0/schemas"
+
+  cleanup:
+    after: [ libraries ]
+    plugin: nil
+    override-prime: |
+      set -eux
+
+      rm -rf usr/share/doc
+      rm -rf usr/share/man
+      rm -rf usr/libexec/*/installed-tests
+      rm -rf usr/libexec/installed-tests
+      rm -f usr/lib/*.la
+      rm -f usr/lib/*/*.la
+
+      find . -type d -empty -delete
+
