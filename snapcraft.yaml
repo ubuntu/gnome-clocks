@@ -66,6 +66,7 @@ parts:
       - -usr/bin
       - -usr/lib/*/glib-2.0
       - -usr/share
+      - -usr/include
 
   vala:
     after: [ glib ]
