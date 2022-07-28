@@ -92,6 +92,7 @@ parts:
       - appstream-util
       - appstream
       - libgnome-desktop-3-dev
+      - libgeoclue-2-dev
     override-pull: |
       craftctl default
       craftctl set version=$(git describe --tags --abbrev=10)
