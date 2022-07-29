@@ -81,6 +81,7 @@ parts:
     source-tag: '42.0'
     source-type: git
     plugin: meson
+    parse-info: [usr/share/metainfo/org.gnome.clocks.appdata.xml]
     meson-parameters:
       - --prefix=/usr
       - --buildtype=release
