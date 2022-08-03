@@ -99,6 +99,11 @@ parts:
     build-environment: *buildenv
     stage-packages:
       - libgeoclue-2-0
+    override-build: |
+      craftctl default
+      sed -i 's|Icon=org.gnome.clocks$|Icon=${SNAP}/meta/gui/org.gnome.clocks.svg|g' $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.clocks.desktop
+      mkdir -p $CRAFT_PART_INSTALL/meta/gui
+      cp $CRAFT_PART_SRC/data/icons/hicolor/scalable/apps/org.gnome.clocks.svg $CRAFT_PART_INSTALL/meta/gui/
 
   cleanup:
     after: [ gnome-clocks ]
