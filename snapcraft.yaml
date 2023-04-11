@@ -77,7 +77,7 @@ parts:
   gnome-clocks:
     after: [ libgweather ]
     source: https://gitlab.gnome.org/GNOME/gnome-clocks.git
-    source-tag: '42.0'
+    source-tag: '44.0'
     source-type: git
     plugin: meson
     parse-info: [usr/share/metainfo/org.gnome.clocks.appdata.xml]
