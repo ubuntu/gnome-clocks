@@ -51,6 +51,10 @@ parts:
     source: https://gitlab.gnome.org/GNOME/geocode-glib.git
     source-tag: '3.26.3'
     source-depth: 1
+# ext:updatesnap
+#   version-format:
+#     lower-than: '3.27'
+#     no-9x-revisions: true
     plugin: meson
     meson-parameters:
       - --prefix=/usr
@@ -66,6 +70,10 @@ parts:
     after: [ libgeocode ]
     source: https://gitlab.gnome.org/GNOME/libgweather.git
     source-tag: '4.1.0'
+# ext:updatesnap
+#   version-format:
+#     lower-than: '4.2'
+#     no-9x-revisions: true
     source-depth: 1
     plugin: meson
     meson-parameters:
@@ -80,6 +88,10 @@ parts:
     after: [ libgweather ]
     source: https://gitlab.gnome.org/GNOME/gnome-clocks.git
     source-tag: '44.0'
+# ext:updatesnap
+#   version-format:
+#     lower-than: '45'
+#     no-9x-revisions: true
     source-depth: 1
     source-type: git
     plugin: meson
