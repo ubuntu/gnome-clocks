@@ -49,7 +49,7 @@ parts:
 
   libgeocode:
     source: https://gitlab.gnome.org/GNOME/geocode-glib.git
-    source-tag: '3.26.3'
+    source-tag: '3.26.4'
     source-depth: 1
 # ext:updatesnap
 #   version-format:
@@ -69,7 +69,7 @@ parts:
   libgweather:
     after: [ libgeocode ]
     source: https://gitlab.gnome.org/GNOME/libgweather.git
-    source-tag: '4.1.0'
+    source-tag: '4.1.1'
 # ext:updatesnap
 #   version-format:
 #     lower-than: '4.2'
@@ -140,4 +140,3 @@ parts:
       for snap in "core22" "gtk-common-themes" "gnome-42-2204"; do
         cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$CRAFT_PRIME/{}" \;
       done
-
