@@ -87,7 +87,7 @@ parts:
   gnome-clocks:
     after: [ libgweather ]
     source: https://gitlab.gnome.org/GNOME/gnome-clocks.git
-    source-tag: '44.0'
+    source-tag: '45.0'
 # ext:updatesnap
 #   version-format:
 #     lower-than: '46'
