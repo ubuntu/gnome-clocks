@@ -36,56 +36,16 @@ apps:
     desktop: usr/share/applications/org.gnome.clocks.desktop
 
 parts:
-
-  buildenv:
+  snapbuildtools:
+    source: https://github.com/sergio-costas/snap-build-tools.git
+    source-depth: 1
     plugin: nil
-    build-environment: &buildenv
-      - PATH: $CRAFT_STAGE/usr/bin:$PATH
-      - ACLOCAL_PATH: $CRAFT_STAGE/usr/share/aclocal
-      - XDG_DATA_DIRS: $CRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
-      - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/lib/vala-0.54:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
-      - GDK_PIXBUF_MODULE_FILE: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
-      - PKG_CONFIG_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig:$CRAFT_STAGE/usr/lib/pkgconfig:$CRAFT_STAGE/usr/share/pkgconfig:$PKG_CONFIG_PATH
-
-  libgeocode:
-    source: https://gitlab.gnome.org/GNOME/geocode-glib.git
-    source-tag: '3.26.4'
-    source-depth: 1
-# ext:updatesnap
-#   version-format:
-#     lower-than: '3.27'
-#     no-9x-revisions: true
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
-      - -Denable-installed-tests=false
-      - -Denable-introspection=true
-      - -Denable-gtk-doc=false
-      - -Dsoup2=true
-    build-packages:
-      - libnghttp2-dev
-
-  libgweather:
-    after: [ libgeocode ]
-    source: https://gitlab.gnome.org/GNOME/libgweather.git
-    source-tag: '4.1.1'
-# ext:updatesnap
-#   version-format:
-#     lower-than: '4.2'
-#     no-9x-revisions: true
-    source-depth: 1
-    plugin: meson
-    meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
-      - -Dintrospection=true
-      - -Dgtk_doc=false
-      - -Dtests=false
-      - -Dsoup2=true
+    override-pull: |
+      craftctl default
+      $CRAFT_PART_SRC/install
 
   gnome-clocks:
-    after: [ libgweather ]
+    after: [snapbuildtools]
     source: https://gitlab.gnome.org/GNOME/gnome-clocks.git
     source-tag: '45.0'
 # ext:updatesnap
@@ -111,10 +71,18 @@ parts:
     override-pull: |
       craftctl default
       craftctl set version=$(git describe --tags --abbrev=10)
-    build-environment: *buildenv
+    build-environment:
+      - PATH: $CRAFT_STAGE/usr/bin:$PATH
+      - ACLOCAL_PATH: $CRAFT_STAGE/usr/share/aclocal
+      - XDG_DATA_DIRS: $CRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
+      - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/lib/vala-0.54:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
+      - GDK_PIXBUF_MODULE_FILE: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      - PKG_CONFIG_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig:$CRAFT_STAGE/usr/lib/pkgconfig:$CRAFT_STAGE/usr/share/pkgconfig:$PKG_CONFIG_PATH
     stage-packages:
       - libgeoclue-2-0
+    build-snaps: [core22, gtk-common-themes, gnome-42-2204]
     override-build: |
+      $CRAFT_PROJECT_DIR/snapbuildtools/remove_common.py core22 gtk-common-themes gnome-42-2204
       craftctl default
       sed -i 's|Icon=org.gnome.clocks$|Icon=${SNAP}/meta/gui/org.gnome.clocks.svg|g' $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.clocks.desktop
       mkdir -p $CRAFT_PART_INSTALL/meta/gui
@@ -125,7 +93,6 @@ parts:
     plugin: nil
     override-prime: |
       set -eux
-
       rm -rf usr/share/doc
       rm -rf usr/share/man
       rm -rf usr/libexec/*/installed-tests
@@ -135,8 +102,5 @@ parts:
       rm -rf usr/include
       rm -rf usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
       rm -rf usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig
-
       find . -type d -empty -delete
-      for snap in "core22" "gtk-common-themes" "gnome-42-2204"; do
-        cd "/snap/$snap/current" && find . -type f,l -name *.so.* -exec rm -f "$CRAFT_PRIME/{}" \;
-      done
+      glib-compile-schemas $CRAFT_PRIME/usr/share/glib-2.0/schemas
