@@ -95,7 +95,7 @@ parts:
     source-depth: 1
     source-type: git
     plugin: meson
-    parse-info: [usr/share/metainfo/org.gnome.clocks.appdata.xml]
+    parse-info: [usr/share/metainfo/org.gnome.clocks.metainfo.xml]
     meson-parameters:
       - --prefix=/usr
       - --buildtype=release
