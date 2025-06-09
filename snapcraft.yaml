@@ -21,25 +21,27 @@ slots:
     bus: session
     name: org.gnome.clocks
 
+plugs:
+  desktop:
+    desktop-file-ids:
+      - org.gnome.clocks
 apps:
   gnome-clocks:
     command: usr/bin/gnome-clocks
     extensions: [ gnome ]
     plugs:
       - audio-playback
-    desktop: usr/share/applications/org.gnome.clocks.desktop
 
 parts:
-
   buildenv:
     plugin: nil
     build-environment: &buildenv
       - PATH: $CRAFT_STAGE/usr/bin:$PATH
       - ACLOCAL_PATH: $CRAFT_STAGE/usr/share/aclocal
       - XDG_DATA_DIRS: $CRAFT_STAGE/usr/share:/usr/share:$XDG_DATA_DIRS
-      - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/lib/vala-0.56:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
-      - GDK_PIXBUF_MODULE_FILE: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0/2.10.0/loaders.cache
-      - PKG_CONFIG_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig:$CRAFT_STAGE/usr/lib/pkgconfig:$CRAFT_STAGE/usr/share/pkgconfig:$PKG_CONFIG_PATH
+      - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/lib/vala-0.56:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
+      - GDK_PIXBUF_MODULE_FILE: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      - PKG_CONFIG_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig:$CRAFT_STAGE/usr/lib/pkgconfig:$CRAFT_STAGE/usr/share/pkgconfig:$PKG_CONFIG_PATH
 
   gnome-clocks:
     source: https://gitlab.gnome.org/GNOME/gnome-clocks.git
@@ -53,17 +55,16 @@ parts:
       - --buildtype=release
     build-packages:
       - libgnome-desktop-4-dev
-      - libgeocode-glib-dev
       - libgeoclue-2-dev
     build-environment: *buildenv
     stage-packages:
       - libgeoclue-2-0
-      - libgeocode-glib-2-0
     override-build: |
       craftctl default
       sed -i 's|Icon=org.gnome.clocks$|Icon=${SNAP}/meta/gui/org.gnome.clocks.svg|g' $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.clocks.desktop
       mkdir -p $CRAFT_PART_INSTALL/meta/gui
       cp $CRAFT_PART_SRC/data/icons/hicolor/scalable/apps/org.gnome.clocks.svg $CRAFT_PART_INSTALL/meta/gui/
+      cp $CRAFT_PART_INSTALL/usr/share/applications/org.gnome.clocks.desktop $CRAFT_PART_INSTALL/meta/gui/
 
   cleanup:
     after: [ gnome-clocks ]
@@ -78,8 +79,8 @@ parts:
       rm -f usr/lib/*.la
       rm -f usr/lib/*/*.la
       rm -rf usr/include
-      rm -rf usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
-      rm -rf usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig
+      rm -rf usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gdk-pixbuf-2.0
+      rm -rf usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig
 
       find . -type d -empty -delete
       for snap in "core24" "gtk-common-themes" "gnome-46-2404"; do
